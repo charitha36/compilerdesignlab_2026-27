@@ -26,10 +26,10 @@ class TinyCStrParser(Parser):
     # Stage 1a is fully working. Read docs/sly_parser_help.md ##1
     # before filling this in -- the tuple's ORDER matters and it is the
     # opposite of what most people guess.
-    # precedence = (
-    #     ('left', ...),
-    #     ('left', ...),
-    # )
+    precedence = (
+        ('left',PLUS,MINUS),
+        ('left',TIMES,DIVIDE,REMAINDER),
+    )
 
     def __init__(self):
         self.had_error = False
@@ -42,34 +42,41 @@ class TinyCStrParser(Parser):
     # Program. This is the grammar's start symbol -- parser.parse(...)
     # returns whatever this rule returns.
     #
-    # @_('func_def')
-    # def program(self, p):
-    #     ...
+    @_('func_def')
+    def program(self, value):
+        p=Program()
+        p.addFunction(value[0])
+        return p
 
     # TODO(week-3, stage-1a): 
     # func_def -> INT ID LPAREN RPAREN LBRACE decl_stmt_list stmt_list RBRACE
     # Build Function(DataType.INT, ID.name). return type and name 
     # decl_stmt_list is a list of decls it gives symbol table. 
     # stmt_list is a list of stmts it gives ast_list.
-    # @_('INT ID LPAREN RPAREN LBRACE decl_stmt_list stmt_list RBRACE')
-    # def func_def(self, p):
-    #     ...
+    @_('INT ID LPAREN RPAREN LBRACE decl_stmt_list stmt_list RBRACE')
+    def func_def(self, value):
+        f=Function(value[0],value[1])
+        for symbol_entry in value[5]:
+            f.localSymbolTable.addSymbol(symbol_entry)
+        f.setStatementsAstList(value[6])
+        return f
+
 
     # TODO(week-3, stage-1a): decl_stmt_list -> decl_stmt_list decl | empty
     # Build a flat Python list by appending each stmt (SymbolTableEntry)
     # onto the list accumulated so far.
     #
-    # @_('decl_stmt_list decl')
-    # def decl_stmt_list(self, p):
-    #     ...
+    @_('decl_stmt_list decl')
+    def decl_stmt_list(self, value):
+        return value[0]+value[1]
     #
-    # @_('empty')
-    # def decl_stmt_list(self, p):
-    #     return []
+    @_('empty')
+    def decl_stmt_list(self, value):
+        return []
     #
-    # @_('')
-    # def empty(self, p):
-    #     pass
+    @_('')
+    def empty(self, value):
+        pass
 
 
     # TODO(week-3, stage-1a): decl -> INT id_list SEMICOLON
@@ -77,25 +84,33 @@ class TinyCStrParser(Parser):
     # build a SymbolTableEntry(name, DataType.INT). Return a LIST of
     # these entries (not a single one, since `int a,b,c;` declares three).
     #
-    # @_('INT id_list SEMI')
-    # def decl(self, p):
-    #     ...
+    @_('INT id_list SEMICOLON')
+    def decl(self, value):
+        Symbol_entry_list=[]
+        for name in value[1]:
+            Symbol_entry_list.append(SymbolTableEntry(name,value[0]))
+            return Symbol_entry_list
     
     # TODO(week-3, stage-1a): id_list -> id_list COMMA ID | ID
     # Build a flat Python list of name strings.
-    
+    @_('id_list COMMA ID')
+    def id_list(self,value):
+        return value[0]+[value[2]]
+    @_("ID")
+    def id_list(self,value):
+        return value[0]
     
     # TODO(week-3, stage-1a): stmt_list -> stmt_list stmt | empty
     # Build a flat Python list by appending each AST node 
     # (Assign/Print) onto the list accumulated so far.
     #
-    # @_('stmt_list stmt')
-    # def stmt_list(self, p):
-    #     ...
+    @_('stmt_list stmt')
+    def stmt_list(self, value):
+        return value[0]+[value[1]]
     #
-    # @_('empty')
-    # def stmt_list(self, p):
-    #     return []
+    @_('empty')
+    def stmt_list(self, value):
+        return []
     #
     # @_('')
     # def empty(self, p):
@@ -107,34 +122,40 @@ class TinyCStrParser(Parser):
     # TODO(week-3, stage-1a): stmt -> assign | print_stmt
     # (two separate @_(...) rules, each just returning ast of assign
     # / print_stmt respectively 
+    @_('assign')
+    def stmt(self,value):
+        return value[0]
 
+    @_('print_stmt')
+    def stmt(self,value):
+        return value[0]
 
     
     # TODO(week-3, stage-1a): assign -> ID ASSIGN expr SEMICOLON
     # Build Assign(Var(p.ID), p.expr).
     #
-    # @_('ID ASSIGN expr SEMICOLON')
-    # def assign(self, p):
-    #     ...
+    @_('ID ASSIGN expr SEMICOLON')
+    def assign(self, value):
+        return Assign(Var(value[0]),value[2])
 
     # TODO(week-3, stage-1a): print_stmt -> PRINT expr SEMICOLON
     # Build Print(p.expr).
     #
-    # @_('PRINT expr SEMI')
-    # def print_stmt(self, p):
-    #     ...
+    @_('PRINT expr SEMICOLON')
+    def print_stmt(self, value):
+        return Print(value[1])
 
     # TODO(week-3, stage-1a): expr -> NUMBER | ID
     # NUMBER -> Num(int(p.NUMBER)), ID -> Var(p.ID). No arithmetic yet --
     # that's all of Stage 1b below.
     #
-    # @_('NUMBER')
-    # def expr(self, p):
-    #     ...
+    @_('NUMBER')
+    def expr(self, value):
+        return Num(value[0])
     #
-    # @_('ID')
-    # def expr(self, p):
-    #     ...
+    @_('ID')
+    def expr(self, value):
+        return Var(value[0])
 
     # ------------------------------------------------------------------
     # Stage 1b: arithmetic expressions.
@@ -148,9 +169,29 @@ class TinyCStrParser(Parser):
     # the lab plan explicitly asks you to look at this, not just trust
     # that it worked.
     #
-    # @_('expr PLUS expr')
-    # def expr(self, p):
-    #     return BinOp('+', p.expr0, p.expr1)
+    @_('expr PLUS expr')
+    def expr(self, value):
+        return BinOp('+', value[0],value[2])
+
+    @_('expr MINUS expr')
+    def expr(self, value):
+        return BinOp('-', value[0],value[2])
+
+    @_('expr TIMES expr')
+    def expr(self, value):
+        return BinOp('*', value[0],value[2])
+
+    @_('expr DIVIDE expr')
+    def expr(self, value):
+        return BinOp('/', value[0],value[2])
+
+    @_('expr REMAINDER expr')
+    def expr(self, value):
+        return BinOp('%', value[0],value[2])
+
+    @_('LPAREN expr RPAREN')
+    def expr(self, value):
+        return value[1]
     # (MINUS, TIMES, DIVIDE similarly; LPAREN expr RPAREN just returns
     # the inner expr unchanged -- parentheses don't need their own node)
 
@@ -164,13 +205,15 @@ class TinyCStrParser(Parser):
         Keep this simple for Level 1 --
         structured error recovery is not required this week.
         """
-        raise NotImplementedError("implement TinyCStrParser.error()")
+        #raise NotImplementedError("implement TinyCStrParser.error()")
+        self.had_error=True
+        print(f"Syntax error at {token.value} in the number{token.lineno}")
 
 
 if __name__ == '__main__':
     from ast_nodes import pretty
 
-    sample = "int main(){\n  int a;\n  a = 5;\n  print a;\n}\n"
+    sample = "int main(){\n  int a;\n  a = 5;\nb=10;\nc=5;\n d=17;\ne=15;f=a+b-c/d*e;\n print f;\n}\n"
     lexer = TinyCStrLexer()
     parser = TinyCStrParser()
     program = parser.parse(lexer.tokenize(sample))
