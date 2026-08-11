@@ -32,7 +32,8 @@ class TinyCStrLexer(Lexer):
     @_(r'\n+')
     def ignore_newline(self, t):
         self.lineno+=t.value.count('\n')
-        return t
+        return
+    t
 
     # ------------------------------------------------------------------
     # Stage 1a: keyword table + identifier rule
