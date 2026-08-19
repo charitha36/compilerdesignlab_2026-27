@@ -62,7 +62,7 @@ def is_literal(operand):
     variable name or a TripleRef. Level 1's expr grammar has no unary
     minus, so this only needs to handle plain digit strings.
     """
-    return isinstance(operand, str) and operand.isdigit()
+    return isinstance(operand,(int, str)) and str( operand).isdigit()
 
 
 class BinOpTriple:
