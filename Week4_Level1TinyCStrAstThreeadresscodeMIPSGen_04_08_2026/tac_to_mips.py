@@ -100,8 +100,8 @@ class MIPSGenerator:
             raise RuntimeError(
                     f"Variable '{name}' not found in symbol table"
                     )
-            offset = symbol.getOffset()
-            return f"{offset}($fp)"
+        offset = self.symbol_table.getSymbol(name).getOffset()
+        return f"{offset}($fp)"
 
 
         #raise NotImplementedError("implement MIPSGenerator.resolve_address()")
@@ -132,7 +132,7 @@ class MIPSGenerator:
         to a variable's slot, the register holding it is free to reuse.
         """
         address=self.resolve_address(name)
-        self.addMIPS(f"sw {reg},{address}")
+        self.addMIPS(f"sw {reg}, {address}")
         self.deallocate_register(reg)
         #raise NotImplementedError("implement MIPSGenerator.store()")
 
@@ -197,6 +197,20 @@ class MIPSGenerator:
                 src=self.allocate_registers()
                 self.load(triple.arg1,src)
             self.store(src,triple.dest)
+
+        elif isinstance(triple,PrintTriple):
+            if isinstance(triple.arg1,TripleRef):
+                src=self.triple_index_to_reg[triple.arg1.index]
+            else:
+                src=self.allocate_registers()
+                self.load(triple.arg1,src)
+
+            self.addMIPS(f"move $a0, {src}")
+            self.addMIPS("li $v0, 1")
+            self.addMIPS("syscall")
+
+            if not isinstance(triple.arg1,TripleRef):
+                self.deallocate_register(src)
 
 
        # raise NotImplementedError("implement MIPSGenerator.gen_instr()")

@@ -1,0 +1,18 @@
+Function main
+  Assign
+    Var(a)
+    Const(4.5,DataType.DOUBLE)
+  Assign
+    Var(b)
+    Const(3.4,DataType.DOUBLE)
+  Assign
+    Var(c)
+    Ternary
+      RelOp(>)
+        BinOp(*)
+          Var(a)
+          Var(b)
+        Var(b)
+      Const(TRUE,DataType.STRING)
+      Const(FALSE,DataType.STRING)
+
