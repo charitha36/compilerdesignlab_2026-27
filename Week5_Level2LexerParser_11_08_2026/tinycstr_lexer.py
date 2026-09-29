@@ -19,7 +19,7 @@ class TinyCStrLexer(Lexer):
         INT, ID, NUMBER, PRINT, ASSIGN, SEMICOLON, LBRACE, RBRACE, COMMA,
         PLUS, MINUS, TIMES, DIVIDE, REMAINDER, LPAREN, RPAREN,
         # ---- LEVEL 2 (this week) ----
-        DOUBLE, REAL_CONST, CHAR, STRING, CHAR_CONST, STRING_CONST,
+        DOUBLE,REAL_CONST, CHAR, STRING, CHAR_CONST, STRING_CONST,
         LT, GT, LE, GE, EQ, NE, 
         QUESTION, COLON 
         # week-5, stage-2a: add DOUBLE, REAL_CONST to this set.
@@ -86,10 +86,10 @@ class TinyCStrLexer(Lexer):
     # reaches the parser -- see docs/sly_help2.md #1 for why
     # this has to be function-style, not just a style preference.
     #
-    # @_(r'\d+\.\d+')
-    # def REAL_CONST(self, t):
-    #     t.value = float(t.value)
-    #     return t
+   # @_(r'\d+\.\d+')
+    #def FNUMBER(self, t):
+     #    t.value = float(t.value)
+      #$   return t
 
     # ------------------------------------------------------------------
     # LEVEL 2, Stage 2b -- char/string constants, relational operators

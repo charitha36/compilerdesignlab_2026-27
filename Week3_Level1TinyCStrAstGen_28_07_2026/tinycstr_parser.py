@@ -98,7 +98,7 @@ class TinyCStrParser(Parser):
         return value[0]+[value[2]]
     @_("ID")
     def id_list(self,value):
-        return value[0]
+        return [value[0]]
     
     # TODO(week-3, stage-1a): stmt_list -> stmt_list stmt | empty
     # Build a flat Python list by appending each AST node 

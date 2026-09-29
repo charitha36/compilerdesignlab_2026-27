@@ -1,0 +1,6 @@
+Function main
+  Assign
+    Var(a)
+    Num(5)
+  Print
+    Var(a)

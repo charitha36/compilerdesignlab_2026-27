@@ -10,6 +10,11 @@ from sly import Lexer
 
 
 class TinyCStrLexer(Lexer):
+    def __init__(self, error_sink=None):
+        super().__init__()
+        self.error_sink = error_sink
+
+
     # ------------------------------------------------------------------
     # Full Stage 1a + 1b token set is declared here
     # ------------------------------------------------------------------
@@ -32,8 +37,8 @@ class TinyCStrLexer(Lexer):
     @_(r'\n+')
     def ignore_newline(self, t):
         self.lineno+=t.value.count('\n')
-        return
-    t
+        return t
+
 
     # ------------------------------------------------------------------
     # Stage 1a: keyword table + identifier rule
@@ -94,7 +99,7 @@ class TinyCStrLexer(Lexer):
         """
         #raise NotImplementedError("implement TinyCStrLexer.error()")
         print(f"Error:{t.value[0]},{t.lineno}")
-        self.lineno+=1
+        self.index+=1
 
 
 if __name__ == '__main__':
