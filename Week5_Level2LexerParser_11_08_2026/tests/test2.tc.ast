@@ -1,0 +1,14 @@
+Function main
+  Assign
+    Var(a)
+    Const(5,DataType.INT)
+  Assign
+    Var(b)
+    Const(5,DataType.INT)
+  Assign
+    Var(c)
+    BinOp(+)
+      Var(a)
+      Var(b)
+  Print
+    Var(c)

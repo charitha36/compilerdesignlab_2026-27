@@ -1,0 +1,6 @@
+Function main
+  Assign
+    Var(a)
+    Const(5,DataType.INT)
+  Print
+    Var(a)
